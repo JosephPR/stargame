@@ -14,7 +14,7 @@
 
 <script type="text/javascript">
 
-var config = {
+ const config = {
     type: Phaser.AUTO,
     width: 1200,
     height: 600,
@@ -32,22 +32,25 @@ var config = {
     }
 };
 
-var player;
-var stars;
-var bombs;
-var platforms;
-var cursors;
-var score = 0;
-var gameOver = false;
-var scoreText;
+let player;
+let stars;
+let pumpkin;
+let bombs;
+let platforms;
+let cursors;
+let score = 0;
+let gameOver = false;
+let scoreText;
 
-var game = new Phaser.Game(config);
+let game = new Phaser.Game(config);
 
 function preload ()
 {
     this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/platform.png');
+    this.load.image('small-ground', 'assets/images/platform-050w.png');
     this.load.image('star', 'assets/star.png');
+    this.load.image('pumpkin', 'assets/images/pumpkin.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
@@ -71,6 +74,10 @@ function create ()
     platforms.create(500, 400, 'ground');
     platforms.create(40, 250, 'ground');
     platforms.create(960, 250, 'ground');
+    platforms.create(500, 100, 'small-ground');
+    platforms.create(620, 200, 'small-ground');
+    platforms.create(370, 200, 'small-ground');
+    platforms.create(550, 300, 'small-ground');
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, 'dude');
@@ -105,14 +112,26 @@ function create ()
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     stars = this.physics.add.group({
         key: 'star',
-        repeat: 13,
-        setXY: { x: 20, y: 0, stepX: 87 }
+        repeat: 5,
+        setXY: { x: 20, y: 0, stepX: 220 }
     })
 
     stars.children.iterate(function (child) {
 
         //  Give each star a slightly different bounce
         child.setBounceY(Phaser.Math.FloatBetween(1, 0.8));
+
+    });
+    pumpkins = this.physics.add.group({
+        key: 'pumpkin',
+        repeat: 2,
+        setXY: { x: 370, y: 0, stepX: 130 }
+    })
+
+    pumpkins.children.iterate(function (child) {
+
+        //  Give each star a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(1, 0.5));
 
     });
 
@@ -124,10 +143,12 @@ function create ()
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
+    this.physics.add.collider(pumpkins, platforms);
     this.physics.add.collider(bombs, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
+    this.physics.add.overlap(player, pumpkins, collectPumpkin, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
 }
@@ -141,13 +162,13 @@ function update ()
 
     if (cursors.left.isDown)
     {
-        player.setVelocityX(-160);
+        player.setVelocityX(-200);
 
         player.anims.play('left', true);
     }
     else if (cursors.right.isDown)
     {
-        player.setVelocityX(160);
+        player.setVelocityX(200);
 
         player.anims.play('right', true);
     }
@@ -169,13 +190,40 @@ function collectStar (player, star)
     star.disableBody(true, true);
 
     //  Add and update the score
-    score += 100;
+    score += 1000;
     scoreText.setText('Score: ' + score);
 
     if (stars.countActive(true) === 0)
     {
         //  A new batch of stars to collect
         stars.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
+
+    }
+}
+function collectPumpkin (player, pumpkin)
+{
+    pumpkin.disableBody(true, true);
+
+    //  Add and update the score
+    score += 2200;
+    scoreText.setText('Score: ' + score);
+
+    if (pumpkins.countActive(true) === 0)
+    {
+        //  A new batch of pumpkins to collect
+        pumpkins.children.iterate(function (child) {
 
             child.enableBody(true, child.x, 0, true, true);
 
