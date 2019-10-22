@@ -1,6 +1,6 @@
-<!doctype html> 
-<html lang="en"> 
-<head> 
+<!doctype html>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <title>Making your first Phaser 3 Game - Part 10</title>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
@@ -16,7 +16,7 @@
 
 var config = {
     type: Phaser.AUTO,
-    width: 800,
+    width: 1200,
     height: 600,
     physics: {
         default: 'arcade',
@@ -45,15 +45,18 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-    this.load.image('sky', 'assets/sky.png');
+    this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/platform.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 }
 
+
+
 function create ()
 {
+
     //  A simple background for our game
     this.add.image(400, 300, 'sky');
 
@@ -62,16 +65,15 @@ function create ()
 
     //  Here we create the ground.
     //  Scale it to fit the width of the game (the original sprite is 400x32 in size)
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+    platforms.create(400, 568, 'ground').setScale(4).refreshBody();
 
     //  Now let's create some ledges
-    platforms.create(600, 400, 'ground');
-    platforms.create(50, 250, 'ground');
-    platforms.create(750, 220, 'ground');
+    platforms.create(500, 400, 'ground');
+    platforms.create(40, 250, 'ground');
+    platforms.create(960, 250, 'ground');
 
     // The player and its settings
     player = this.physics.add.sprite(100, 450, 'dude');
-
     //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
@@ -103,8 +105,8 @@ function create ()
     //  Some stars to collect, 12 in total, evenly spaced 70 pixels apart along the x axis
     stars = this.physics.add.group({
         key: 'star',
-        repeat: 11,
-        setXY: { x: 20, y: 0, stepX: 70 }
+        repeat: 13,
+        setXY: { x: 20, y: 0, stepX: 87 }
     })
 
     stars.children.iterate(function (child) {
@@ -117,7 +119,7 @@ function create ()
     bombs = this.physics.add.group();
 
     //  The score
-    scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
@@ -167,7 +169,7 @@ function collectStar (player, star)
     star.disableBody(true, true);
 
     //  Add and update the score
-    score += 10;
+    score += 100;
     scoreText.setText('Score: ' + score);
 
     if (stars.countActive(true) === 0)
