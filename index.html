@@ -6,12 +6,17 @@
     <script src="//cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js"></script>
     <style type="text/css">
         body {
-            margin: 0;
+            margin: 90px;
+            background: linear-gradient(to bottom, #33ccff 0%, #ff99cc 100%);
+          }
+        h1 {
+          text-align: center;
+          color:
         }
     </style>
 </head>
 <body>
-
+<h1>Jumpman 5000</h1>
 <script type="text/javascript">
 
  const config = {
@@ -52,6 +57,8 @@ function preload ()
     this.load.image('sky', 'assets/background.png');
     this.load.image('ground', 'assets/platform.png');
     this.load.image('small-ground', 'assets/images/platform-050w.png');
+    this.load.image('med-ground', 'assets/images/platform-100w.png');
+    this.load.image('large-ground', 'assets/images/platform-200w.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('pumpkin', 'assets/images/pumpkin.png');
     this.load.image('diamond', 'assets/images/diamond.png');
@@ -78,9 +85,10 @@ function create ()
     //  Now let's create some ledges
     platforms.create(500, 400, 'ground');
     platforms.create(40, 250, 'ground');
-    platforms.create(960, 250, 'ground');
+    platforms.create(920, 250, 'med-ground');
+    platforms.create(1100, 150, 'med-ground');
     platforms.create(500, 100, 'small-ground');
-    platforms.create(620, 200, 'small-ground');
+    platforms.create(630, 200, 'small-ground');
     platforms.create(370, 200, 'small-ground');
     platforms.create(550, 300, 'small-ground');
 
@@ -324,6 +332,8 @@ function hitCat (player, cat)
 
     gameOver = true;
 }
+
+
 
 </script>
 
