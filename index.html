@@ -177,6 +177,7 @@ function create ()
         cats.enableBody = true;
 
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
+    highScoreText = this.add.text(840, 16, 'High Score: 47500', { fontSize: '26px', fill: '#000' });
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
