@@ -34,8 +34,10 @@
 
 let player;
 let stars;
-let pumpkin;
+let pumpkins;
 let bombs;
+let cats;
+let diamonds;
 let platforms;
 let cursors;
 let score = 0;
@@ -44,6 +46,7 @@ let scoreText;
 
 let game = new Phaser.Game(config);
 
+
 function preload ()
 {
     this.load.image('sky', 'assets/background.png');
@@ -51,8 +54,10 @@ function preload ()
     this.load.image('small-ground', 'assets/images/platform-050w.png');
     this.load.image('star', 'assets/star.png');
     this.load.image('pumpkin', 'assets/images/pumpkin.png');
+    this.load.image('diamond', 'assets/images/diamond.png');
     this.load.image('bomb', 'assets/bomb.png');
     this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
+    this.load.spritesheet('cat', 'assets/images/cat.png', { frameWidth: 35, frameHeight: 32 });
 }
 
 
@@ -79,8 +84,9 @@ function create ()
     platforms.create(370, 200, 'small-ground');
     platforms.create(550, 300, 'small-ground');
 
+
     // The player and its settings
-    player = this.physics.add.sprite(100, 450, 'dude');
+    player = this.physics.add.sprite(370, 250, 'dude');
     //  Player physics properties. Give the little guy a slight bounce.
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
@@ -135,22 +141,50 @@ function create ()
 
     });
 
+    diamonds = this.physics.add.group({
+        key: 'diamond',
+        repeat: 1,
+        setXY: { x: 270, y: 0, stepX: 470 }
+    })
+
+    diamonds.children.iterate(function (child) {
+
+        //  Give each star a slightly different bounce
+        child.setBounceY(Phaser.Math.FloatBetween(1, 0.5));
+
+    });
+
     bombs = this.physics.add.group();
 
-    //  The score
+
+        cats = this.physics.add.sprite(600, 470, 'cat');
+
+        cats.allowGravity = true;
+        cats.setVelocityX(200)
+        cats.setBounce(1);
+        cats.setCollideWorldBounds(true);
+        // cats.body.gravity.y(300)
+        // cats.setBounce.x(1);
+        // cats.setCollideWorldBounds(true);
+        cats.enableBody = true;
+
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
 
     //  Collide the player and the stars with the platforms
     this.physics.add.collider(player, platforms);
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(pumpkins, platforms);
+    this.physics.add.collider(diamonds, platforms);
     this.physics.add.collider(bombs, platforms);
+    this.physics.add.collider(cats, platforms);
 
     //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
     this.physics.add.overlap(player, stars, collectStar, null, this);
     this.physics.add.overlap(player, pumpkins, collectPumpkin, null, this);
+    this.physics.add.overlap(player, diamonds, collectDiamond, null, this);
 
     this.physics.add.collider(player, bombs, hitBomb, null, this);
+    this.physics.add.collider(player, cats, hitCat, null, this);
 }
 
 function update ()
@@ -207,7 +241,7 @@ function collectStar (player, star)
         var bomb = bombs.create(x, 16, 'bomb');
         bomb.setBounce(1);
         bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.setVelocity(Phaser.Math.Between(-100, 100), 20);
         bomb.allowGravity = false;
 
     }
@@ -217,7 +251,7 @@ function collectPumpkin (player, pumpkin)
     pumpkin.disableBody(true, true);
 
     //  Add and update the score
-    score += 2200;
+    score += 1500;
     scoreText.setText('Score: ' + score);
 
     if (pumpkins.countActive(true) === 0)
@@ -239,8 +273,48 @@ function collectPumpkin (player, pumpkin)
 
     }
 }
+function collectDiamond (player, diamond)
+{
+    diamond.disableBody(true, true);
+
+    //  Add and update the score
+    score += 2000;
+    scoreText.setText('Score: ' + score);
+
+    if (diamonds.countActive(true) === 0)
+    {
+        //  A new batch of diamonds to collect
+        diamonds.children.iterate(function (child) {
+
+            child.enableBody(true, child.x, 0, true, true);
+
+        });
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+
+        var bomb = bombs.create(x, 16, 'bomb');
+        bomb.setBounce(1);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-300, 300), 20);
+        bomb.allowGravity = false;
+
+    }
+}
+
+
 
 function hitBomb (player, bomb)
+{
+    this.physics.pause();
+
+    player.setTint(0xff0000);
+
+    player.anims.play('turn');
+
+    gameOver = true;
+}
+
+function hitCat (player, cat)
 {
     this.physics.pause();
 
